@@ -23,3 +23,4 @@ The project serves as a practical demonstration of the four pillars of Object-Or
 /backend  -> Spring Boot source code, JDBC logic, and API controllers
 /frontend -> React components, Tailwind styling, and Dashboard visuals
 /docs     -> Project reports and technical documentation
+

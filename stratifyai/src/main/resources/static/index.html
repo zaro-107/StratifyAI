@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StratifyAI Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
+        
+        body { background: #0f1117; color: #e0e0e0; min-height: 100vh; }
+
+        .header {
+            background: #1a1d27;
+            border-bottom: 1px solid #2a2d3a;
+            padding: 18px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 38px;
+            height: 38px;
+            background: linear-gradient(135deg, #4f8ef7, #7c3aed);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .logo h1 {
+            font-size: 20px;
+            font-weight: 600;
+            color: #ffffff;
+            letter-spacing: 0.5px;
+        }
+
+        .logo span {
+            font-size: 12px;
+            color: #6b7280;
+            display: block;
+            margin-top: 2px;
+        }
+
+        .badge {
+            background: #1e293b;
+            border: 1px solid #2a2d3a;
+            color: #4f8ef7;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+
+        .main { max-width: 1200px; margin: 0 auto; padding: 30px 20px; }
+
+        .upload-section {
+            background: #1a1d27;
+            border: 1px solid #2a2d3a;
+            border-radius: 16px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .upload-section h2 {
+            font-size: 22px;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 8px;
+        }
+
+        .upload-section p {
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+
+        .upload-area {
+            border: 2px dashed #2a2d3a;
+            border-radius: 12px;
+            padding: 40px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            transition: border-color 0.3s;
+        }
+
+        .upload-area:hover { border-color: #4f8ef7; }
+
+        .upload-area input { display: none; }
+
+        .upload-area label {
+            cursor: pointer;
+            color: #4f8ef7;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .upload-icon {
+            font-size: 40px;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .file-name {
+            margin-top: 10px;
+            color: #6b7280;
+            font-size: 13px;
+        }
+
+        button {
+            background: linear-gradient(135deg, #4f8ef7, #7c3aed);
+            color: white;
+            border: none;
+            padding: 13px 50px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            letter-spacing: 0.5px;
+            transition: opacity 0.2s;
+        }
+
+        button:hover { opacity: 0.9; }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #4f8ef7;
+            font-size: 16px;
+        }
+
+        .dashboard { display: none; }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: #1a1d27;
+            border: 1px solid #2a2d3a;
+            padding: 24px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            color: #6b7280;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+        }
+
+        .stat-card p {
+            color: #ffffff;
+            font-size: 32px;
+            font-weight: 700;
+        }
+
+        .stat-card .stat-icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 16px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #2a2d3a;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .chart-card {
+            background: #1a1d27;
+            border: 1px solid #2a2d3a;
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        .chart-card h3 {
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #2a2d3a;
+        }
+
+        .analysis-table {
+            background: #1a1d27;
+            border: 1px solid #2a2d3a;
+            padding: 24px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            overflow-x: auto;
+        }
+
+        table { width: 100%; border-collapse: collapse; }
+
+        th {
+            background: #0f1117;
+            color: #6b7280;
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px solid #2a2d3a;
+        }
+
+        td {
+            padding: 14px 16px;
+            border-bottom: 1px solid #1e2130;
+            color: #e0e0e0;
+            font-size: 14px;
+        }
+
+        tr:hover td { background: #1e2130; }
+
+        .trend-up { color: #22c55e; font-weight: 600; }
+        .trend-down { color: #ef4444; font-weight: 600; }
+        .trend-stable { color: #f59e0b; font-weight: 600; }
+
+        .prediction-badge {
+            background: #1e293b;
+            color: #4f8ef7;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .error {
+            display: none;
+            background: #2d1515;
+            border: 1px solid #ef4444;
+            color: #ef4444;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="logo">
+        <div class="logo-icon">S</div>
+        <div>
+            <h1>StratifyAI</h1>
+            <span>Pattern Recognition & Forecasting Platform</span>
+        </div>
+    </div>
+    <div class="badge">v1.0 Beta</div>
+</div>
+
+<div class="main">
+
+    <div class="upload-section">
+        <h2>Analyze Your Data</h2>
+        <p>Upload any CSV file to get instant pattern recognition, trend analysis and predictions</p>
+
+        <div class="upload-area">
+            <input type="file" id="csvFile" accept=".csv"/>
+            <label for="csvFile">
+                <span class="upload-icon">📂</span>
+                Click to upload CSV file
+            </label>
+            <div class="file-name" id="fileName">Supported format: .csv</div>
+        </div>
+
+        <button onclick="analyzeData()">Run Analysis</button>
+        <div class="error" id="error">Error! Please check your CSV file.</div>
+    </div>
+
+    <div class="loading" id="loading">⚙️ Processing data... Please wait!</div>
+
+    <div class="dashboard" id="dashboard">
+
+        <div class="stats-row">
+            <div class="stat-card">
+                <span class="stat-icon">📋</span>
+                <h3>Total Rows</h3>
+                <p id="totalRows">-</p>
+            </div>
+            <div class="stat-card">
+                <span class="stat-icon">📊</span>
+                <h3>Total Columns</h3>
+                <p id="totalColumns">-</p>
+            </div>
+            <div class="stat-card">
+                <span class="stat-icon">🔍</span>
+                <h3>Columns Analyzed</h3>
+                <p id="colsAnalyzed">-</p>
+            </div>
+        </div>
+
+        <div class="section-title">📈 Data Visualization</div>
+        <div class="charts-grid" id="chartsGrid"></div>
+
+        <div class="analysis-table">
+            <div class="section-title">📋 Detailed Analysis Report</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Column</th>
+                        <th>Average</th>
+                        <th>Min</th>
+                        <th>Max</th>
+                        <th>Pattern</th>
+                        <th>Next Prediction</th>
+                    </tr>
+                </thead>
+                <tbody id="analysisBody"></tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    document.getElementById('csvFile').addEventListener('change', function() {
+        let fileName = this.files[0] ? this.files[0].name : 'Supported format: .csv';
+        document.getElementById('fileName').textContent = fileName;
+    });
+
+    let charts = [];
+
+    async function analyzeData() {
+        let fileInput = document.getElementById('csvFile');
+        if (!fileInput.files[0]) {
+            alert('Please select a CSV file first!');
+            return;
+        }
+
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('dashboard').style.display = 'none';
+        document.getElementById('error').style.display = 'none';
+
+        let formData = new FormData();
+        formData.append('file', fileInput.files[0]);
+
+        try {
+            let response = await fetch('http://localhost:8080/analyze', {
+                method: 'POST',
+                body: formData
+            });
+
+            let data = await response.json();
+            document.getElementById('loading').style.display = 'none';
+
+            if (data.error) {
+                document.getElementById('error').style.display = 'block';
+                document.getElementById('error').textContent = data.error;
+                return;
+            }
+
+            document.getElementById('totalRows').textContent = data.totalRows;
+            document.getElementById('totalColumns').textContent = data.totalColumns;
+            document.getElementById('colsAnalyzed').textContent = Object.keys(data.analysis).length;
+
+            charts.forEach(c => c.destroy());
+            charts = [];
+            document.getElementById('chartsGrid').innerHTML = '';
+            document.getElementById('analysisBody').innerHTML = '';
+
+            let colors = [
+                '#4f8ef7', '#7c3aed', '#22c55e',
+                '#f59e0b', '#ef4444', '#06b6d4'
+            ];
+            let colorIndex = 0;
+
+            for (let [col, colData] of Object.entries(data.analysis)) {
+                let color = colors[colorIndex % colors.length];
+                colorIndex++;
+
+                let chartDiv = document.createElement('div');
+                chartDiv.className = 'chart-card';
+                chartDiv.innerHTML = `<h3>${col}</h3><canvas id="chart_${col.replace(/[^a-zA-Z0-9]/g,'_')}"></canvas>`;
+                document.getElementById('chartsGrid').appendChild(chartDiv);
+
+                let ctx = document.getElementById(`chart_${col.replace(/[^a-zA-Z0-9]/g,'_')}`).getContext('2d');
+                let chart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: colData.values.map((_, i) => `Row ${i+1}`),
+                        datasets: [{
+                            label: col,
+                            data: colData.values,
+                            backgroundColor: color + '33',
+                            borderColor: color,
+                            borderWidth: 2,
+                            borderRadius: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            x: {
+                                ticks: { color: '#6b7280', font: { size: 11 } },
+                                grid: { color: '#2a2d3a' }
+                            },
+                            y: {
+                                ticks: { color: '#6b7280', font: { size: 11 } },
+                                grid: { color: '#2a2d3a' }
+                            }
+                        }
+                    }
+                });
+                charts.push(chart);
+
+                let trendClass = colData.pattern.includes('↑') ? 'trend-up' :
+                                 colData.pattern.includes('↓') ? 'trend-down' : 'trend-stable';
+
+                let row = `<tr>
+                    <td><strong style="color:#ffffff">${col}</strong></td>
+                    <td>${colData.average}</td>
+                    <td>${colData.min}</td>
+                    <td>${colData.max}</td>
+                    <td class="${trendClass}">${colData.pattern}</td>
+                    <td><span class="prediction-badge">${colData.prediction}</span></td>
+                </tr>`;
+                document.getElementById('analysisBody').innerHTML += row;
+            }
+
+            document.getElementById('dashboard').style.display = 'block';
+
+        } catch (error) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('error').style.display = 'block';
+            document.getElementById('error').textContent = 'Cannot connect to server! Make sure Spring Boot is running!';
+        }
+    }
+</script>
+
+</body>
+</html>
